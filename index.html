@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"
+        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <div id="checkHistory"></div>
+    <div id="checkTrigger1"></div>
+    <div id="checkTrigger2"></div>
+    <div id="checkTrigger3"></div>
+    <script>
+        $('#root').on('touchstart', () => $("#checkTrigger1").text("터치start"));
+        $('#root').on('touchmove', () => $("#checkTrigger2").text("터치move"));
+        $('#root').on('touchend', () => $("#checkTrigger3").text("터치end"));
+        console.log($('#root').trigger('touchstart'))
+        console.log($('#root').trigger('touchmove'))
+        console.log($('#root').trigger('touchend'))
+        console.log($('#root').animate({
+            scrollTop: 0
+        }, 800))
+    </script>
+    <script>
+        var parsing_params_of_url = function (url) {
+            var match, params, regex;
+            regex = /[?&]([^=#]+)=([^&#]*)/g;
+            params = {};
+            match = void 0;
+            while (match = regex.exec(url)) {
+                params[match[1]] = match[2];
+            }
+            return params;
+        };
+        // if(window.history.length < 2){
+        (function (window, location) {
+            var backListURL = ''
+            params = parsing_params_of_url(window.location.href)
+            if (!params.funnel) {
+                params.funnel = 'organic'
+            }
+            if (location.hostname === 'www.goodoc.co.kr') {
+                backListURL = '//www.goodoc.co.kr/events?funnel=' + params.funnel + '__web_back';
+            } else if (location.hostname === 'test.goodoc.co.kr') {
+                backListURL = '//test.goodoc.co.kr/events?funnel=' + params.funnel + '__web_back';
+            } else {
+                backListURL = '//localhost:3000/events?funnel=' + params.funnel + '__web_back';
+            }
+            if ("<%= @two_depth_id %>" !== "") {
+                backListURL += "&top_category=" + "<%= @two_depth_id %>"
+            } else if ("<%= @one_depth_id%>" !== "") {
+                backListURL += "&top_category=" + "<%= @one_depth_id %>"
+            }
+            var originURL = location.pathname + location.search;
+            history.replaceState(null, document.title, location.pathname + "#goodoc_event_list");
+            history.pushState(null, document.title, originURL);
+            console.log(window.history.length)
+            $('#checkHistory').text(window.history.length)
+            window.addEventListener("popstate", function (e) {
+                if (location.hash === "#goodoc_event_list") {
+                    history.replaceState(null, document.title, originURL);
+                    setTimeout(function () {
+                        location.replace(backListURL);
+                    }, 10);
+                }
+            }, false);
+        }(window, location));
+        // }
+    </script>
+</body>
+
+</html>
